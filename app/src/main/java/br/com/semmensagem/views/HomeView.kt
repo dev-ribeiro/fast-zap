@@ -39,11 +39,15 @@ import br.com.semmensagem.R
 import br.com.semmensagem.ui.theme.CONTAINER_GAP
 import br.com.semmensagem.ui.theme.Green600
 import br.com.semmensagem.ui.theme.ROW_GAP
+import br.com.semmensagem.utils.helpers.WhatsAppHelper
+import br.com.semmensagem.utils.to.WhatsAppMessageTO
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeView() {
     val ctx = LocalContext.current
+
+    val whatsapp = WhatsAppHelper(ctx)
 
     val MAX_SIZE_DDD = 2
     val MAX_SIZE_PHONE = 9
@@ -56,6 +60,14 @@ fun HomeView() {
     val sheetState = rememberModalBottomSheetState()
     var isOpeningBottomSheetModal by remember { mutableStateOf(false) }
 
+    fun openBottomSheetModal() {
+        isOpeningBottomSheetModal = true
+    }
+
+    fun closeBottomSheetModal() {
+        isOpeningBottomSheetModal = false
+    }
+
     fun handlerOpenBottomSheetModal() {
         if (ddd.length != 2) {
             Toast.makeText(ctx, "DDD Inválido", Toast.LENGTH_SHORT).show()
@@ -67,7 +79,13 @@ fun HomeView() {
             return
         }
 
-        isOpeningBottomSheetModal = true
+        openBottomSheetModal()
+    }
+
+    fun resetFormValues() {
+        ddd = ""
+        phoneNumber = ""
+        body = ""
     }
 
     Scaffold(topBar = {
@@ -154,36 +172,67 @@ fun HomeView() {
             if (isOpeningBottomSheetModal) {
                 ModalBottomSheet(
                     sheetState = sheetState,
-                    onDismissRequest = { isOpeningBottomSheetModal = false },
+                    onDismissRequest = { closeBottomSheetModal() },
                 ) {
                     Row(
                         modifier = Modifier.padding(bottom = 100.dp, start = 12.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(36.dp)
                     ) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.whatsapp),
-                                contentDescription = "Créditos: Freepick",
-                                modifier = Modifier.width(50.dp)
-                            )
+                        Button(
+                            onClick = {
+                                val to = WhatsAppMessageTO(ddd, phoneNumber, body)
+                                val success = whatsapp.sendMessage("whatsapp", to)
+                                if (success) {
+                                    resetFormValues()
+                                }
+                                closeBottomSheetModal()
 
-                            Text("WhatsApp")
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Black
+                            ),
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.whatsapp),
+                                    contentDescription = "Créditos: Freepick",
+                                    modifier = Modifier.width(50.dp)
+                                )
+
+                                Text("WhatsApp")
+                            }
                         }
 
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.whatsapp_business),
-                                contentDescription = "Créditos: Freepick",
-                                modifier = Modifier.width(50.dp)
+                        Button(
+                            onClick = {
+                                val to = WhatsAppMessageTO(ddd, phoneNumber, body)
+                                val success = whatsapp.sendMessage("business", to)
+                                if (success) {
+                                    resetFormValues()
+                                }
+                                closeBottomSheetModal()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Black
                             )
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.whatsapp_business),
+                                    contentDescription = "Créditos: Freepick",
+                                    modifier = Modifier.width(50.dp)
+                                )
 
-                            Text("Business")
+                                Text("Business")
+                            }
                         }
                     }
                 }

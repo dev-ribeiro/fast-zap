@@ -1,5 +1,8 @@
 package br.com.semmensagem.utils.to
 
 data class WhatsAppMessageTO(
-    val ddd: String, val phone: String, val message: String
-)
+    var ddd: String, var phone: String, var message: String?
+) {
+    constructor(ddd: String, phone: String) : this(ddd, phone, null)
+}
+
